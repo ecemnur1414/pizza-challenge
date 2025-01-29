@@ -1,139 +1,161 @@
 import { useState } from "react";
+import styles from "./SiparisKontrol.module.css";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import axios from "axios"; // Axios'u unutma!
 
-export default function SiparisKontrolFormu() {
-  const [pizzaAdi, setPizzaAdi] = useState("Position Absloute Acı Pizza");
-  const [pizzaFiyati, setPizzaFiyati] = useState(85.5);
-  const [pizzaAciklama, setPizzaAciklama] = useState(
-    "Frontent Dev olarak hala position:absolute kullanıyorsan bu çok acı pizza tam sana göre. Pizza, domates, peynir ve genellikle çeşitli diğer malzemelerle kaplanmış, daha sonra geleneksel olarak odun ateşinde bir fırında yüksek sıcaklıkta pişirilen, genellikle yuvarlak, düzleştirilmiş mayalı buğday bazlı hamurdan oluşan İtalyan kökenli lezzetli bir yemektir. . Küçük bir pizzaya bazen pizzetta denir."
-  );
+export default function SiparisKontrolFormu(props) {
+  const { siparisFormundanVeriAL } = props;
   const [pizzaBoyut, setPizzaBoyut] = useState("");
-  const [hamurKalinligi, SetHamurKalinligi] = useState("");
+  const [hamurKalinligi, setHamurKalinligi] = useState("");
   const [ekMalzeme, setEkmalzeme] = useState([]);
   const [siparisNotu, setSiparisNotu] = useState("");
-  const [toplamFiyat, setToplamFiyat] = useState(pizzaFiyati);
   const [musteriAdi, setMusteriAdi] = useState("");
- const[ekMalzemeDisable,setEkMalzemeDisable]=useState(false);
+  const [pizzaAdedi, setPizzaAdedi] = useState(1);
+  const [extraTutari, setExtraTutari] = useState(0);
+  const [toplamFiyat, setToplamFiyat] = useState(85.5);
+  const history = useHistory();
 
-  const ekMalzemeler= [
-    "Pepperoni",
-    "Sosis",
-    "Izgara Tavuk",
-    "Soğan",
-    "Mısır",
-    "Salam",
-    "Sarımsak",
-    "Biber",
-    "Ananas",
-    "Kabak",
-    "Kanada Jambonu",
-    "Domates",
-    "Jalapeno",
-    "Sucuk"
-]
+  const ekMalzemeler = [
+    "Pepperoni", "Sosis", "Izgara Tavuk", "Soğan", "Mısır", "Salam", "Sarımsak", "Biber", "Ananas", "Kabak", "Kanada Jambonu", "Domates", "Jalapeno", "Sucuk"
+  ];
 
-function malzemeKaydet(e)
-{
-    const{value,checked}=e.target;
-    if(checked && ekMalzeme.length<10){
-
-        setEkmalzeme((eskiMalzemeler)=>[...eskiMalzemeler,value])
-
+  // Malzeme ekleme / çıkarma
+  const malzemeKaydet = (e) => {
+    const { value, checked } = e.target;
+    if (checked && ekMalzeme.length < 10) {
+      setEkmalzeme([...ekMalzeme, value]);
+      setExtraTutari(prev => prev + (5 * pizzaAdedi)); // Pizza adediyle çarpılıyor
+    } else {
+      setEkmalzeme(ekMalzeme.filter(malzeme => malzeme !== value));
+      setExtraTutari(prev => prev - (5 * pizzaAdedi)); // Pizza adediyle çarpılıyor
     }
-    else if(!checked)
-    {
-     setEkmalzeme(ekMalzeme.filter((malzeme)=>malzeme !== value))
+  };
+
+  // Pizza adetini arttır
+  const pizzaArttirici = () => {
+    setPizzaAdedi(prev => {
+      const yeniAdet = prev + 1;
+      setToplamFiyat(85.5 * yeniAdet + ekMalzeme.length * 5 * yeniAdet);
+      setExtraTutari(ekMalzeme.length * 5 * yeniAdet); // Ekstra malzeme fiyatı, pizza adedine bağlı artıyor
+      return yeniAdet;
+    });
+  };
+
+  // Pizza adetini azalt
+  const pizzaAzaltici = () => {
+    if (pizzaAdedi > 1) {
+      setPizzaAdedi(prev => {
+        const yeniAdet = prev - 1;
+        setToplamFiyat(85.5 * yeniAdet + ekMalzeme.length * 5 * yeniAdet);
+        setExtraTutari(ekMalzeme.length * 5 * yeniAdet);
+        return yeniAdet;
+      });
     }
-    else if(ekMalzeme.length >= 10)
-    {
-        setEkMalzemeDisable(true)
-        alert("Maximum Ek Malzeme Sınırına Ulaştınız")
+  };
+
+  // Form gönderme işlemi
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const orderData = {
+      pizzaBoyut,
+      hamurKalinligi,
+      pizzaAdedi,
+      selectedExtras: ekMalzeme,
+      orderNote: siparisNotu,
+      customerName: musteriAdi,
+      totalPrice: toplamFiyat,
+    };
+
+    try {
+      const response = await axios.post("https://reqres.in/api/pizza", orderData);
+      console.log("Order Summary:", response.data);
+
+      // Sipariş başarıyla gönderildiğinde yönlendirme
+      formYolla();
+    } catch (error) {
+      console.error("Error submitting order:", error);
     }
-}
+  };
 
+  function formYolla() {
+    siparisFormundanVeriAL(
+      pizzaBoyut,
+      hamurKalinligi,
+      ekMalzeme,
+      siparisNotu,
+      musteriAdi,
+      toplamFiyat,
+      pizzaAdedi,
+      extraTutari
+    );
 
-function pizzaboyutu(e)
-{
-    const {value}=e.target;
-    setPizzaBoyut (value)
+    history.push("/onay");
+  }
 
-}
-
-
-
-
-
-function siparisNotlandirma(e)
-{
- setSiparisNotu(e.target.value)
-}
-
-console.log(siparisNotu)
-
-
-
-
-
+  const isButtonDisabled = !(pizzaBoyut && hamurKalinligi && musteriAdi);
 
   return (
-    <div>
-      <h1>{pizzaAdi}</h1>
-      <span>{pizzaFiyati}₺</span> <span>4.9</span> <span>(500)</span>
-      <p>{pizzaAciklama}</p>
-      <p>Pizza Boyutunu Seç</p>
-      <label className="size-label" htmlFor="kucuk">
-        <input onClick={pizzaboyutu} name="size" value="Küçük" type="radio" id="kucuk" />
-        Küçük
-      </label>
-      <label htmlFor="orta">
-        <input onClick={pizzaboyutu} name="size" value="Orta" type="radio" id="orta" />
-        Orta
-      </label>
-      <label htmlFor="buyuk">
-        <input onClick={pizzaboyutu} name="size" value="Büyük" type="radio" id="buyuk" />
-        Büyük
-      </label>
-      <div>
-        <div>
-        <label for="hamurlar">Hamur Seç:</label>
+    <div className={styles.siparisFormu}>
+      <h1>Position Absloute Acı Pizza</h1>
+      <span>85.5₺</span> <span>4.9</span> <span>(500)</span>
+      <p>Frontend Dev olarak hala position:absolute kullanıyorsan bu çok acı pizza tam sana göre.</p>
+
+      <form onSubmit={handleSubmit}>
+        <h2>Pizza Boyutunu Seç <span className={styles.zorunlu}>*</span></h2>
+        {["Küçük", "Orta", "Büyük"].map(size => (
+          <label key={size}>
+            <input type="radio" name="size" value={size} onChange={(e) => setPizzaBoyut(e.target.value)} /> {size}
+          </label>
+        ))}
+
+        <h2>Hamur Seç <span className={styles.zorunlu}>*</span></h2>
+        <select onChange={(e) => setHamurKalinligi(e.target.value)}>
+          <option value="">Seçiniz</option>
+          <option value="Extra İnce">Extra İnce</option>
+          <option value="İnce">İnce</option>
+          <option value="Orta">Orta</option>
+          <option value="Kalın">Kalın</option>
+        </select>
+
+        <div className={styles.flexCheckbox}>
+          <h2>Ek Malzemeler (En Fazla 10 Malzeme, 5₺)</h2>
+          {ekMalzemeler.map(malzeme => (
+            <label key={malzeme}>
+              <input
+                type="checkbox"
+                value={malzeme}
+                onChange={malzemeKaydet}
+                checked={ekMalzeme.includes(malzeme)}
+                disabled={ekMalzeme.length >= 10 && !ekMalzeme.includes(malzeme)}
+              />
+              {malzeme}
+            </label>
+          ))}
         </div>
-      
-      <select name="hamurlar" id="hamurlar">
-        <option value="extra-ince">Extra İnce</option>
-        <option value="ince">İnce</option>
-        <option value="orta">Orta</option>
-        <option value="Kalin">Kalın</option>
-       
-      </select>
 
-      </div>
-      <h2>Ek Malzemeler</h2>
-      <p>En Fazla 10 Malzeme Seçebilirsiniz. 5₺</p>
-      <div>
-        {ekMalzemeler.map((value,key)=>
-        (
-        <label key={value}>
-          
-          <input onClick={malzemeKaydet}  type="checkbox" value={value} 
-          
-          disabled={ekMalzemeDisable}
-          />
-          {value}
-        </label>
+        <h2>Sipariş Notu</h2>
+        <textarea onChange={(e) => setSiparisNotu(e.target.value)}></textarea>
 
+        <h2>Teslim Alacak Kişi <span className={styles.zorunlu}>*</span></h2>
+        <input type="text" onChange={(e) => setMusteriAdi(e.target.value)} />
 
-        )
-        
-        )}
-      </div>
+        <h2>Ekstra Tutarı: {extraTutari}₺</h2>
+        <h2>Toplam Tutar: {toplamFiyat}₺</h2>
 
-      <div>
-        <h2>Sipariş Notunu Yazınız</h2>
-        <label htmlFor="notu">
+        <div>
+          <button type="button" onClick={pizzaAzaltici}>-</button>
+          <span>{pizzaAdedi}</span>
+          <button type="button" onClick={pizzaArttirici}>+</button>
+        </div>
 
-        <textarea onChange={siparisNotlandirma} name="siparisNotu" id="notu"></textarea>
-        </label>
-      </div>
-     
+        <button 
+          type="submit" 
+          disabled={isButtonDisabled} 
+          className={isButtonDisabled ? styles.disabled : styles.active}>
+          Siparişi Tamamla
+        </button>
+      </form>
     </div>
   );
 }

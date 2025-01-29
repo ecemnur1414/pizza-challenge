@@ -1,0 +1,61 @@
+.siparisFormu {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  background: #FFEBEB;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+
+
+.siparisFormu button {
+  background-color: #CE2829;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.siparisFormu button:hover {
+  background-color: #a62224;
+  transform: scale(1.05);
+}
+
+.siparisFormu button.disabled {
+  background-color: #ff9999;
+  cursor: not-allowed;
+}
+
+.siparisFormu label {
+  display: block;
+  margin: 5px 0;
+}
+
+.siparisFormu .flexCheckbox {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  justify-items: center;
+}
+
+.siparisFormu select, .siparisFormu textarea, .siparisFormu input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #CE2829;
+  border-radius: 4px;
+}
+
+.siparisFormu textarea {
+  height: 80px;
+}
+
+.siparisFormu button:disabled {
+  background-color: #ff9999;
+  cursor: not-allowed;
+}

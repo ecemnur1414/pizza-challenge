@@ -1,0 +1,85 @@
+/* banner.css */
+.banner-relative-div {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Ekranın tamamını kaplaması için */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Resmin ekranı tamamen kaplamasını ve taşmasını önler */
+    z-index: -1;
+}
+
+.banner-title {
+    text-align: center;
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 180px;
+    font-weight: bold;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5); /* Yazıyı belirginleştirmek için */
+}
+
+.banner-title h2 {
+    font-size: 2rem;
+}
+
+.banner-title h1 {
+    font-size: 3rem;
+}
+
+.banner-button {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    background-color: #ff4500;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.banner-button:hover {
+    background-color: #e63900;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .banner-title h1 {
+        font-size: 2rem;
+    }
+
+    .banner-title h2 {
+        font-size: 1.5rem;
+    }
+
+    .banner-button {
+        font-size: 1.2rem;
+        padding: 10px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .banner-title h1 {
+        font-size: 1.5rem;
+    }
+
+    .banner-title h2 {
+        font-size: 1.2rem;
+    }
+
+    .banner-button {
+        font-size: 1rem;
+        padding: 8px 16px;
+    }
+}
